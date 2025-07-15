@@ -1,108 +1,120 @@
-# examen-docker
-  📦 1. Commandes de base
-Commande	Description
-docker --version	Affiche la version de Docker
-docker info	Donne les infos du système Docker
-docker ps	Liste des conteneurs actifs
-docker ps -a	Liste tous les conteneurs (même arrêtés)
-docker images	Liste les images Docker locales
-docker rm [id]	Supprimer un conteneur
-docker rmi [image]	Supprimer une image
+README - Concepts Docker
+1. Docker Image
+Une image Docker est un modèle en lecture seule qui contient les instructions pour créer un conteneur Docker. Elle inclut le système d'exploitation, les logiciels, les bibliothèques et le code applicatif.
 
-🚀 2. Lancer un conteneur
+Commandes principales:
+
 bash
-Copier
-Modifier
-docker run hello-world
+# Lister les images locales
+docker images
+
+# Télécharger une image depuis Docker Hub
+docker pull nom_image:tag
+
+# Construire une image depuis un Dockerfile
+docker build -t nom_image .
+
+# Supprimer une image
+docker rmi nom_image
+2. Docker Container
+Un conteneur est une instance exécutable d'une image Docker. C'est un environnement isolé qui exécute les applications.
+
+Commandes principales:
+
 bash
-Copier
-Modifier
-docker run -it ubuntu bash
-Option	Description
--it	Mode interactif (terminal)
---rm	Supprime le conteneur à la fin
--d	Mode détaché (en arrière-plan)
--p 8080:80	Redirige le port 80 du conteneur vers 8080 sur l’hôte
+# Lancer un nouveau conteneur
+docker run -d --name mon_conteneur nom_image
 
-📁 3. Volumes (partage de fichiers)
-bash
-Copier
-Modifier
-docker run -v /chemin/local:/chemin/conteneur image
-Exemple
-docker run -v $(pwd):/app ubuntu
+# Lister les conteneurs (en cours d'exécution)
+docker ps
 
-🛠️ 4. Images et Docker Hub
-Commande	Description
-docker pull nginx	Télécharger une image
-docker build -t monimage .	Créer une image à partir d’un Dockerfile
-docker push monuser/monimage	Pousser une image vers Docker Hub
+# Lister tous les conteneurs (y compris arrêtés)
+docker ps -a
 
-🔁 5. Gestion des conteneurs
-Commande	Description
-docker start [id]	Démarrer un conteneur
-docker stop [id]	Stopper un conteneur
-docker exec -it [id] bash	Ouvrir un terminal dans un conteneur
-docker logs [id]	Voir les logs d’un conteneur
+# Arrêter un conteneur
+docker stop mon_conteneur
 
-📄 6. Dockerfile – Structure de base
-Un Dockerfile est un fichier texte qui contient les instructions pour construire une image Docker.
+# Démarrer un conteneur arrêté
+docker start mon_conteneur
 
-Exemple simple : Dockerfile pour une app Python
-Dockerfile
-Copier
-Modifier
-# Image de base
-FROM python:3.10
+# Supprimer un conteneur
+docker rm mon_conteneur
+3. Dockerfile
+Un Dockerfile est un script texte qui contient toutes les commandes nécessaires pour construire une image Docker.
 
-# Répertoire de travail
+Exemple de Dockerfile:
+
+dockerfile
+FROM ubuntu:20.04
+RUN apt-get update && apt-get install -y python3
+COPY . /app
 WORKDIR /app
+CMD ["python3", "app.py"]
+Commandes principales:
 
-# Copier les fichiers dans l'image
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-
-COPY . .
-
-# Commande pour démarrer l'app
-CMD ["python", "app.py"]
-Principales instructions Dockerfile
-Instruction	Description
-FROM	Définit l’image de base
-WORKDIR	Définit le répertoire de travail
-COPY	Copie les fichiers vers l’image
-RUN	Exécute une commande pendant la construction
-CMD	Commande par défaut à l’exécution
-EXPOSE	Indique les ports utilisés
-ENV	Définit une variable d’environnement
-
-🧪 7. Construire et exécuter une image personnalisée
 bash
-Copier
-Modifier
-docker build -t monapp .
-docker run -it monapp
-⚠️ 8. Nettoyage
-Commande	Description
-docker system prune	Supprimer tout ce qui est inutilisé (dangereux !)
-docker image prune	Supprimer les images inutilisées
-docker volume prune	Supprimer les volumes non utilisés
+# Construire une image depuis un Dockerfile
+docker build -t mon_image .
 
-📚 Bonus : Docker Compose (multi-conteneurs)
-Fichier docker-compose.yml :
+# Spécifier un fichier Dockerfile différent
+docker build -f Dockerfile.dev -t mon_image .
+4. Docker Compose
+Docker Compose est un outil pour définir et exécuter des applications Docker multi-conteneurs à l'aide d'un fichier YAML.
+
+Exemple de docker-compose.yml:
 
 yaml
-Copier
-Modifier
 version: '3'
 services:
   web:
-    image: nginx
+    build: .
     ports:
-      - "8080:80"
-Lancer :
+      - "5000:5000"
+  redis:
+    image: "redis:alpine"
+Commandes principales:
 
 bash
-Copier
-Modifier
-docker-compose up -d# examen-docker
+# Démarrer les services
+docker-compose up -d
+
+# Arrêter les services
+docker-compose down
+
+# Lister les services en cours
+docker-compose ps
+
+# Reconstruire et redémarrer les services
+docker-compose up --build
+5. Docker Volume
+Les volumes Docker sont le mécanisme préféré pour persister les données générées et utilisées par les conteneurs Docker.
+
+Commandes principales:
+
+bash
+# Créer un volume
+docker volume create mon_volume
+
+# Lister les volumes
+docker volume ls
+
+# Inspecter un volume
+docker volume inspect mon_volume
+
+# Supprimer un volume
+docker volume rm mon_volume
+
+# Monter un volume dans un conteneur
+docker run -v mon_volume:/chemin/dans/conteneur nom_image
+Bonnes pratiques
+Utilisez des images officielles quand c'est possible
+
+Gardez vos images aussi petites que possible
+
+Utilisez des volumes pour les données persistantes
+
+Une seule préoccupation par conteneur
+
+Documentez vos Dockerfiles avec des commentaires
+
+
